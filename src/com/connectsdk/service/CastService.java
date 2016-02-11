@@ -361,6 +361,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                 Log.e(Util.T, "Closing application error", e);
             }
             mApiClient.disconnect();
+            notifyDisconnect();
         }
         if (connected) {
             Util.runOnUI(new Runnable() {
@@ -1305,6 +1306,18 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         setCapabilities(capabilities);
     }
 
+    private void notifyDisconnect() {
+    	CastWebAppSession webAppSession = sessions.get(currentAppId);
+
+        sessions.remove(currentAppId);
+        
+        currentAppId = null;
+
+        if (webAppSession != null) {
+        	webAppSession.handleAppClose();
+        }
+    }
+    
     private class CastListener extends Cast.Listener {
         @Override
         public void onApplicationDisconnected(int statusCode) {
@@ -1312,15 +1325,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
             if (currentAppId == null)
                 return;
-
-            CastWebAppSession webAppSession = sessions.get(currentAppId);
-
-            if (webAppSession == null)
-                return;
-
-            webAppSession.handleAppClose();
-
-            currentAppId = null;
+            notifyDisconnect();
         }
 
         @Override
@@ -1513,9 +1518,8 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
                 CastWebAppSession webAppSession = new CastWebAppSession(launchSession, CastService.this);
                 webAppSession.setMetadata(applicationMetadata);
-
+                
                 sessions.put(applicationMetadata.getApplicationId(), webAppSession);
-
                 if (listener != null) {
                     listener.onSuccess(webAppSession);
                 }
