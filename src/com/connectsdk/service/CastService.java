@@ -20,6 +20,7 @@
 
 package com.connectsdk.service;
 
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -349,6 +350,12 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
     @Override
     public void disconnect() {
+        if (!connected)
+            return;
+
+        AudioManager a;
+
+        connected = false;
         mWaitingForReconnect = false;
         detachMediaPlayer();
         if (!commandQueue.isEmpty()) {
@@ -1170,8 +1177,6 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                         newVolume = (float)1.0;
 
                     setVolume(newVolume, listener);
-
-                    Util.postSuccess(listener, null);
                 }
             }
 
@@ -1198,8 +1203,6 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                         newVolume = (float)0.0;
 
                     setVolume(newVolume, listener);
-
-                    Util.postSuccess(listener, null);
                 }
             }
 
@@ -1218,7 +1221,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             public void onConnected() {
                 try {
                     mCastClient.setVolume(mApiClient, volume);
-                    Util.postSuccess(listener, null);
+                    Util.postSuccess(listener, volume);
                 } catch (Exception e) {
                     Util.postError(listener, new ServiceCommandError(0, "setting volume level failed", null));
                 }
