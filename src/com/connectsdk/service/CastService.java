@@ -722,6 +722,8 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                 .setMediaTracks(mediaTracks)
                 .build();
 
+        Log.e(Util.T, "playMedia!!![" + url + "]mimeTpye[" + mimeType + "]");
+
         playMedia(mediaInformation, applicationID, listener);
     }
 
@@ -763,6 +765,59 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     }
 
     private void playMedia(final com.google.android.gms.cast.MediaInfo mediaInformation, final String mediaAppId, final LaunchListener listener) {
+        // directly load media file
+        if (mMediaPlayer != null) {
+            ConnectionListener connectionListener = new ConnectionListener() {
+
+                @Override
+                public void onConnected() {
+                    Log.e(Util.T, "directly load!");
+
+                    mMediaPlayer
+                            .load(mApiClient, mediaInformation,
+                                    true)
+                            .setResultCallback(
+                                    new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+
+                                        @Override
+                                        public void onResult(
+                                                MediaChannelResult result) {
+
+                                            Status status = result
+                                                    .getStatus();
+
+                                            Log.e(Util.T, "mMediaPlayer.load:directly load onResult[" + status);
+
+                                            CastWebAppSession webAppSession = sessions.get(currentAppId);
+
+                                            //if (status.isSuccess()) {
+                                            if (true) { // does not care about the load status.
+                                                webAppSession.launchSession
+                                                        .setSessionType(LaunchSessionType.Media);
+
+                                                Util.postSuccess(
+                                                        listener,
+                                                        new MediaLaunchObject(
+                                                                webAppSession.launchSession,
+                                                                CastService.this));
+                                            } else {
+                                                Util.postError(
+                                                        listener,
+                                                        new ServiceCommandError(
+                                                                status.getStatusCode(),
+                                                                status.getStatusMessage(),
+                                                                status));
+                                            }
+                                        }
+                                    });
+                }
+            };
+
+            runCommand(connectionListener);
+
+            return;
+        }
+
         final ApplicationConnectionResultCallback webAppLaunchCallback =
                 new ApplicationConnectionResultCallback(new LaunchWebAppListener() {
 
@@ -772,6 +827,8 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
                     @Override
                     public void onConnected() {
+                        attachMediaPlayer();
+
                         loadMedia(mediaInformation, webAppSession, listener);
                     }
                 };
@@ -1399,7 +1456,9 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         public void onConnected(Bundle connectionHint) {
             Log.d(Util.T, "ConnectionCallbacks.onConnected, wasWaitingForReconnect: " + mWaitingForReconnect);
 
-            attachMediaPlayer();
+            //attachMediaPlayer();
+
+            //joinFinished();
 
             if (mApiClient != null && mApiClient.isConnected()) {
                 try {
@@ -1502,6 +1561,10 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             Status status = result.getStatus();
 
             if (status.isSuccess()) {
+                String sessionId = result.getSessionId();
+                String applicationStatus = result.getApplicationStatus();
+                boolean wasLaunched = result.getWasLaunched();
+
                 ApplicationMetadata applicationMetadata = result.getApplicationMetadata();
                 currentAppId = applicationMetadata.getApplicationId();
 
