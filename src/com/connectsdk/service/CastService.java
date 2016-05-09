@@ -1276,14 +1276,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             @Override
             public void onConnected() {
                 try {
-                    if (mMediaPlayer != null
-                            && mMediaPlayer.getMediaStatus() != null) {
-                        Log.e("Connect SDK", "stream volume:" + volume);
-                        mMediaPlayer.setStreamVolume(mApiClient, volume);
-                    } else {
+//                    if (mMediaPlayer != null
+//                            && mMediaPlayer.getMediaStatus() != null) {
+//                        Log.e("Connect SDK", "stream volume:" + volume);
+//                        mMediaPlayer.setStreamVolume(mApiClient, volume);
+//                    } else {
                         Log.e("Connect SDK", "device volume:" + volume);
                         mCastClient.setVolume(mApiClient, volume);
-                    }
+//                    }
 
                     Util.postSuccess(listener, null);
                 } catch (Exception e) {
@@ -1314,15 +1314,15 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             e.printStackTrace();
         }
         
-        if (mMediaPlayer != null && mMediaPlayer.getMediaStatus() != null) {
+//        if (mMediaPlayer != null && mMediaPlayer.getMediaStatus() != null) {
             // Log.e("Matchstick", "getVolume: streamVolume[" +
             // currentStreamVolumeLevel + "]");
-            Util.postSuccess(listener, currentStreamVolumeLevel);
-        } else {
+//            Util.postSuccess(listener, currentStreamVolumeLevel);
+//        } else {
             // Log.e("Matchstick", "getVolume: deviceVolume[" +
             // currentStreamVolumeLevel + "]");
             Util.postSuccess(listener, currentVolumeLevel);
-        }
+//        }
 
         //Util.postSuccess(listener, currentVolumeLevel);
     }
@@ -1355,12 +1355,12 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
     @Override
     public void getMute(final MuteListener listener) {
-        if (mMediaPlayer != null
-                && mMediaPlayer.getMediaStatus() != null) {
-            Util.postSuccess(listener, currentStreamMuteStatus);
-        } else {
+//        if (mMediaPlayer != null
+//                && mMediaPlayer.getMediaStatus() != null) {
+//            Util.postSuccess(listener, currentStreamMuteStatus);
+//        } else {
             Util.postSuccess(listener, currentMuteStatus);
-        }
+//        }
 
         //Util.postSuccess(listener, currentMuteStatus);
     }
@@ -1486,14 +1486,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
                                     //Util.postSuccess(listener, currentVolumeLevel);
 
-                                    if (mMediaPlayer != null
-                                            && mMediaPlayer.getMediaStatus() != null) {
-                                        Util.postSuccess(listener,
-                                                currentStreamVolumeLevel);
-                                    } else {
+//                                    if (mMediaPlayer != null
+//                                            && mMediaPlayer.getMediaStatus() != null) {
+//                                        Util.postSuccess(listener,
+//                                                currentStreamVolumeLevel);
+//                                    } else {
                                         Util.postSuccess(listener,
                                                 currentVolumeLevel);
-                                    }
+//                                    }
                                 }
                             }
                             else if (subscription.getTarget().equals(CAST_SERVICE_MUTE_SUBSCRIPTION_NAME)) {
@@ -1501,14 +1501,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                                     @SuppressWarnings("unchecked")
                                     ResponseListener<Object> listener = (ResponseListener<Object>) subscription.getListeners().get(i);
 
-                                    if (mMediaPlayer != null
-                                            && mMediaPlayer.getMediaStatus() != null) {
-                                        Util.postSuccess(listener,
-                                                currentStreamMuteStatus);
-                                    } else {
+//                                    if (mMediaPlayer != null
+//                                            && mMediaPlayer.getMediaStatus() != null) {
+//                                        Util.postSuccess(listener,
+//                                                currentStreamMuteStatus);
+//                                    } else {
                                         Util.postSuccess(listener,
                                                 currentMuteStatus);
-                                    }
+//                                    }
 
                                     //Util.postSuccess(listener, currentMuteStatus);
                                 }
