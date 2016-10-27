@@ -36,7 +36,6 @@ import com.connectsdk.service.command.ServiceCommandError;
 import com.connectsdk.service.config.ServiceDescription;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
-import com.google.android.gms.internal.mr;
 
 import java.util.Date;
 import java.util.List;
