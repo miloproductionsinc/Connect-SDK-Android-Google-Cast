@@ -247,6 +247,8 @@ public class CastDiscoveryProvider implements DiscoveryProvider {
                         listenter.onServiceAdded(CastDiscoveryProvider.this, foundService);
                     }
                 }
+            } else {
+                onRouteAdded(router, route);
             }
         }
 
