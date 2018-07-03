@@ -768,59 +768,6 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     }
 
     private void playMedia(final com.google.android.gms.cast.MediaInfo mediaInformation, final String mediaAppId, final LaunchListener listener) {
-        // directly load media file
-        if (mMediaPlayer != null) {
-            ConnectionListener connectionListener = new ConnectionListener() {
-
-                @Override
-                public void onConnected() {
-                    Log.e(Util.T, "directly load!");
-
-                    mMediaPlayer
-                            .load(mApiClient, mediaInformation,
-                                    true)
-                            .setResultCallback(
-                                    new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-
-                                        @Override
-                                        public void onResult(
-                                                MediaChannelResult result) {
-
-                                            Status status = result
-                                                    .getStatus();
-
-                                            Log.e(Util.T, "mMediaPlayer.load:directly load onResult[" + status);
-
-                                            CastWebAppSession webAppSession = sessions.get(currentAppId);
-
-                                            //if (status.isSuccess()) {
-                                            if (true) { // does not care about the load status.
-                                                webAppSession.launchSession
-                                                        .setSessionType(LaunchSessionType.Media);
-
-                                                Util.postSuccess(
-                                                        listener,
-                                                        new MediaLaunchObject(
-                                                                webAppSession.launchSession,
-                                                                CastService.this));
-                                            } else {
-                                                Util.postError(
-                                                        listener,
-                                                        new ServiceCommandError(
-                                                                status.getStatusCode(),
-                                                                status.getStatusMessage(),
-                                                                status));
-                                            }
-                                        }
-                                    });
-                }
-            };
-
-            runCommand(connectionListener);
-
-            return;
-        }
-
         final ApplicationConnectionResultCallback webAppLaunchCallback =
                 new ApplicationConnectionResultCallback(new LaunchWebAppListener() {
 
