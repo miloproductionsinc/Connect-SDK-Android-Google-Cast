@@ -664,7 +664,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                 .setCustomData(null)
                 .build();
 
-        playMedia(mediaInformation, applicationID, listener);
+        playMedia(mediaInformation, applicationID, 0, listener);
     }
 
     @Override
@@ -691,7 +691,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     }
 
     private void playMedia(String url, SubtitleInfo subtitleInfo, String mimeType, String title,
-                          String description, String iconSrc, boolean shouldLoop,
+                          String description, String iconSrc, boolean shouldLoop, long position,
                           LaunchListener listener) {
         MediaMetadata mMediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
         mMediaMetadata.putString(MediaMetadata.KEY_TITLE, title);
@@ -704,7 +704,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         }
 
         List<MediaTrack> mediaTracks = new ArrayList<>();
-        if(subtitleInfo != null) {
+        if (subtitleInfo != null) {
             MediaTrack subtitle = new MediaTrack.Builder(MEDIA_TRACK_ID, MediaTrack.TYPE_TEXT)
                     .setName(subtitleInfo.getLabel())
                     .setSubtype(MediaTrack.SUBTYPE_SUBTITLES)
@@ -727,14 +727,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
         Log.e(Util.T, "playMedia!!![" + url + "]mimeTpye[" + mimeType + "]");
 
-        playMedia(mediaInformation, applicationID, listener);
+        playMedia(mediaInformation, applicationID, position, listener);
     }
 
     @Override
     public void playMedia(String url, String mimeType, String title,
                           String description, String iconSrc, boolean shouldLoop,
                           LaunchListener listener) {
-        playMedia(url, null, mimeType, title, description, iconSrc, shouldLoop, listener);
+        playMedia(url, null, mimeType, title, description, iconSrc, shouldLoop, 0, listener);
     }
 
     @Override
@@ -750,6 +750,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         String title = null;
         String desc = null;
         String iconSrc = null;
+        long position = 0;
 
         if (mediaInfo != null) {
             mediaUrl = mediaInfo.getUrl();
@@ -757,6 +758,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             mimeType = mediaInfo.getMimeType();
             title = mediaInfo.getTitle();
             desc = mediaInfo.getDescription();
+            position = mediaInfo.getPosition();
 
             if (mediaInfo.getImages() != null && mediaInfo.getImages().size() > 0) {
                 ImageInfo imageInfo = mediaInfo.getImages().get(0);
@@ -764,10 +766,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             }
         }
 
-        playMedia(mediaUrl, subtitle, mimeType, title, desc, iconSrc, shouldLoop, listener);
+        playMedia(mediaUrl, subtitle, mimeType, title, desc, iconSrc, shouldLoop, position, listener);
     }
 
-    private void playMedia(final com.google.android.gms.cast.MediaInfo mediaInformation, final String mediaAppId, final LaunchListener listener) {
+    private void playMedia(
+            final com.google.android.gms.cast.MediaInfo mediaInformation,
+            final String mediaAppId,
+            final long position,
+            final LaunchListener listener) {
         final ApplicationConnectionResultCallback webAppLaunchCallback =
                 new ApplicationConnectionResultCallback(new LaunchWebAppListener() {
 
@@ -779,7 +785,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                     public void onConnected() {
                         attachMediaPlayer();
 
-                        loadMedia(mediaInformation, webAppSession, listener);
+                        loadMedia(mediaInformation, webAppSession, position, listener);
                     }
                 };
 
@@ -817,10 +823,12 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         runCommand(connectionListener);
     }
 
-    private void loadMedia(com.google.android.gms.cast.MediaInfo mediaInformation,
-                           final WebAppSession webAppSession, final LaunchListener listener) {
+    private void loadMedia(final com.google.android.gms.cast.MediaInfo mediaInformation,
+                           final WebAppSession webAppSession,
+                           final long position,
+                           final LaunchListener listener) {
         try {
-            mMediaPlayer.load(mApiClient, mediaInformation, true).setResultCallback(new ResultCallback<MediaChannelResult>() {
+            mMediaPlayer.load(mApiClient, mediaInformation, true, position).setResultCallback(new ResultCallback<MediaChannelResult>() {
 
                 @Override
                 public void onResult(MediaChannelResult result) {
