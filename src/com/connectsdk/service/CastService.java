@@ -552,7 +552,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
                 if (metadata.getImages() != null && metadata.getImages().size() > 0) {
                     String iconUrl = metadata.getImages().get(0).getUrl().toString();
-                    list = new ArrayList<ImageInfo>();
+                    list = new ArrayList<>();
                     list.add(new ImageInfo(iconUrl));
                 }
             }
@@ -692,7 +692,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
     private void playMedia(String url, SubtitleInfo subtitleInfo, String mimeType, String title,
                           String description, String iconSrc, boolean shouldLoop, long position,
-                          LaunchListener listener) {
+                          JSONObject customData, LaunchListener listener) {
         MediaMetadata mMediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
         mMediaMetadata.putString(MediaMetadata.KEY_TITLE, title);
         mMediaMetadata.putString(MediaMetadata.KEY_SUBTITLE, description);
@@ -721,7 +721,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                 .setStreamType(com.google.android.gms.cast.MediaInfo.STREAM_TYPE_BUFFERED)
                 .setMetadata(mMediaMetadata)
                 .setStreamDuration(1000)
-                .setCustomData(null)
+                .setCustomData(customData)
                 .setMediaTracks(mediaTracks)
                 .build();
 
@@ -734,7 +734,13 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     public void playMedia(String url, String mimeType, String title,
                           String description, String iconSrc, boolean shouldLoop,
                           LaunchListener listener) {
-        playMedia(url, null, mimeType, title, description, iconSrc, shouldLoop, 0, listener);
+        playMedia(url, null, mimeType, title, description, iconSrc, shouldLoop, 0, null, listener);
+    }
+
+    public void playMedia(String url, String mimeType, String title,
+                          String description, String iconSrc, boolean shouldLoop,
+                          JSONObject customData, LaunchListener listener) {
+        this.playMedia(url, mimeType, title, description, iconSrc, shouldLoop, customData, listener);
     }
 
     @Override
@@ -751,6 +757,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         String desc = null;
         String iconSrc = null;
         long position = 0;
+        JSONObject customData = null;
 
         if (mediaInfo != null) {
             mediaUrl = mediaInfo.getUrl();
@@ -759,6 +766,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             title = mediaInfo.getTitle();
             desc = mediaInfo.getDescription();
             position = mediaInfo.getPosition();
+            customData = mediaInfo.getCustomData();
 
             if (mediaInfo.getImages() != null && mediaInfo.getImages().size() > 0) {
                 ImageInfo imageInfo = mediaInfo.getImages().get(0);
@@ -766,7 +774,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
             }
         }
 
-        playMedia(mediaUrl, subtitle, mimeType, title, desc, iconSrc, shouldLoop, position, listener);
+        playMedia(mediaUrl, subtitle, mimeType, title, desc, iconSrc, shouldLoop, position, customData, listener);
     }
 
     private void playMedia(
