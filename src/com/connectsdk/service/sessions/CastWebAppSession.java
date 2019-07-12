@@ -22,6 +22,7 @@ package com.connectsdk.service.sessions;
 
 import android.util.Log;
 
+import com.connectsdk.core.MediaInfo;
 import com.connectsdk.core.Util;
 import com.connectsdk.service.CastService;
 import com.connectsdk.service.DeviceService;
@@ -158,6 +159,11 @@ public class CastWebAppSession extends WebAppSession {
     @Override
     public void playMedia(String url, String mimeType, String title, String description, String iconSrc, boolean shouldLoop, MediaPlayer.LaunchListener listener) {
         service.playMedia(url, mimeType, title, description, iconSrc, shouldLoop, listener);
+    }
+
+    @Override
+    public void playMedia(MediaInfo mediaInfo, boolean shouldLoop, MediaPlayer.LaunchListener listener) {
+        service.playMedia(mediaInfo, shouldLoop, listener);
     }
 
     @Override
