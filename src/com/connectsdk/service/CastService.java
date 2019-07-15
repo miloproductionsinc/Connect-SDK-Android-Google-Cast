@@ -90,6 +90,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     public static final String ID = "Chromecast";
 
     public final static String PLAY_STATE = "PlayState";
+    public final static String POSITION = "Position";
     public final static String CAST_SERVICE_VOLUME_SUBSCRIPTION_NAME = "volume";
     public final static String CAST_SERVICE_MUTE_SUBSCRIPTION_NAME = "mute";
 
@@ -595,6 +596,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                                 if (mMediaPlayer != null && mMediaPlayer.getMediaStatus() != null) {
                                     PlayStateStatus status = PlayStateStatus.convertPlayerStateToPlayStateStatus(mMediaPlayer.getMediaStatus().getPlayerState());
                                     Util.postSuccess(listener, status);
+                                }
+                            }
+                        } else if (subscription.getTarget().equalsIgnoreCase(POSITION)) {
+                            for (int i = 0; i < subscription.getListeners().size(); i++) {
+                                @SuppressWarnings("unchecked")
+                                ResponseListener<Object> listener = (ResponseListener<Object>)subscription.getListeners().get(i);
+                                if (mMediaPlayer != null && mMediaPlayer.getMediaStatus() != null) {
+                                    Util.postSuccess(listener, mMediaPlayer.getApproximateStreamPosition());
                                 }
                             }
                         }
@@ -1668,6 +1677,14 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     @Override
     public ServiceSubscription<PlayStateListener> subscribePlayState(PlayStateListener listener) {
         URLServiceSubscription<PlayStateListener> request = new URLServiceSubscription<PlayStateListener>(this, PLAY_STATE, null, null);
+        request.addListener(listener);
+        addSubscription(request);
+
+        return request;
+    }
+
+    public ServiceSubscription<PositionListener> subscribePosition(PositionListener listener) {
+        URLServiceSubscription<PositionListener> request = new URLServiceSubscription<>(this, POSITION, null, null);
         request.addListener(listener);
         addSubscription(request);
 
