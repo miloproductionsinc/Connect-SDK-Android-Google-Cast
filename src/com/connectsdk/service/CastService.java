@@ -577,6 +577,10 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         return request;
     }
 
+    Boolean apiClientIsConnected() {
+        return mApiClient != null && mApiClient.isConnected();
+    }
+
     private void attachMediaPlayer() {
         if (mMediaPlayer != null) {
             return;
@@ -1254,7 +1258,9 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 //                        mMediaPlayer.setStreamVolume(mApiClient, volume);
 //                    } else {
                         Log.e("Connect SDK", "device volume:" + volume);
-                        mCastClient.setVolume(mApiClient, volume);
+                        if(apiClientIsConnected()) {
+                            mCastClient.setVolume(mApiClient, volume);
+                        }
 //                    }
 
                     Util.postSuccess(listener, null);
@@ -1270,9 +1276,11 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     @Override
     public void getVolume(VolumeListener listener) {
         try {
-            currentVolumeLevel = (float) Cast.CastApi
-                    .getVolume(mApiClient);
-            currentMuteStatus = Cast.CastApi.isMute(mApiClient);
+            if(apiClientIsConnected()) {
+                currentVolumeLevel = (float) Cast.CastApi
+                        .getVolume(mApiClient);
+                currentMuteStatus = Cast.CastApi.isMute(mApiClient);
+            }
 
             if (mMediaPlayer != null
                     && mMediaPlayer.getMediaStatus() != null) {
@@ -1309,10 +1317,15 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                     if (mMediaPlayer != null
                             && mMediaPlayer.getMediaStatus() != null) {
                         Log.e("Connect SDK", "set stream Mute:" + isMute);
-                        mMediaPlayer.setStreamMute(mApiClient, isMute);
+                        if(apiClientIsConnected()) {
+                            mMediaPlayer.setStreamMute(mApiClient, isMute);
+                        }
                     } else {
                         Log.e("Connect SDK", "set device Mute:" + isMute);
-                        mCastClient.setMute(mApiClient, isMute);
+
+                        if(apiClientIsConnected()) {
+                            mCastClient.setMute(mApiClient, isMute);
+                        }
                     }
 
                     Util.postSuccess(listener, null);
@@ -1435,9 +1448,10 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                 @Override
                 public void onConnected() {
                     try {
-                        currentVolumeLevel = (float) mCastClient.getVolume(mApiClient);
-                        currentMuteStatus = mCastClient.isMute(mApiClient);
-
+                        if(apiClientIsConnected()) {
+                            currentVolumeLevel = (float) mCastClient.getVolume(mApiClient);
+                            currentMuteStatus = mCastClient.isMute(mApiClient);
+                        }
                         if (mMediaPlayer != null
                                 && mMediaPlayer.getMediaStatus() != null) {
                             currentStreamVolumeLevel = (float) mMediaPlayer
@@ -1490,7 +1504,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                 }
             };
 
-            if (mApiClient != null && mApiClient.isConnected()) {
+            if (apiClientIsConnected()) {
                 runCommand(connectionListener);
             }
         }
@@ -1513,7 +1527,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
             //joinFinished();
 
-            if (mApiClient != null && mApiClient.isConnected()) {
+            if (apiClientIsConnected()) {
                 try {
                     mCastClient.joinApplication(mApiClient)
                             .setResultCallback(new ResultCallback<ApplicationConnectionResult>() {
@@ -1709,7 +1723,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     }
 
     private void runCommand(ConnectionListener connectionListener) {
-        if (mApiClient != null && mApiClient.isConnected()) {
+        if (apiClientIsConnected()) {
             connectionListener.onConnected();
         }
         else {
